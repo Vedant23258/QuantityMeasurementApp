@@ -1,4 +1,3 @@
-package com.quantitymeasurement;
 
 public class UseCase6QuantityMeasurementApp {
 
@@ -32,7 +31,7 @@ public class UseCase6QuantityMeasurementApp {
         }
 
         private double toBaseUnit() {
-            return value * unit.getConversionFactor(); // normalize to inches
+            return value * unit.getConversionFactor();
         }
 
         public QuantityLength add(QuantityLength other) {
