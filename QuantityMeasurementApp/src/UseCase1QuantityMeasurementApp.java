@@ -1,4 +1,3 @@
-package com.apps.quantitymeasurement;
 
 public class UseCase1QuantityMeasurementApp {
 
@@ -30,10 +29,10 @@ public class UseCase1QuantityMeasurementApp {
         Feet f2 = new Feet(1.0);
         Feet f3 = new Feet(2.0);
 
-        System.out.println("1. Same Value (1.0, 1.0): " + f1.equals(f2)); // true
-        System.out.println("2. Different Value (1.0, 2.0): " + f1.equals(f3)); // false
-        System.out.println("3. Null Comparison: " + f1.equals(null)); // false
-        System.out.println("4. Different Type: " + f1.equals("1.0")); // false
-        System.out.println("5. Same Reference: " + f1.equals(f1)); // true
+        System.out.println("1. Same Value (1.0, 1.0): " + f1.equals(f2));
+        System.out.println("2. Different Value (1.0, 2.0): " + f1.equals(f3));
+        System.out.println("3. Null Comparison: " + f1.equals(null));
+        System.out.println("4. Different Type: " + f1.equals("1.0"));
+        System.out.println("5. Same Reference: " + f1.equals(f1));
     }
 }

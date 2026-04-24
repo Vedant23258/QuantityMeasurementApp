@@ -1,10 +1,9 @@
-package com.apps.quantitymeasurement;
 
 public class UseCase3QuantityMeasurementApp {
 
     enum LengthUnit {
         FEET(1.0),
-        INCH(1.0 / 12.0); // 1 inch = 1/12 feet
+        INCH(1.0 / 12.0);
 
         private final double toFeetFactor;
 
