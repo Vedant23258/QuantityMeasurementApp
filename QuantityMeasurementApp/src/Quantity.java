@@ -1,3 +1,5 @@
+import java.util.function.DoubleBinaryOperator;
+
 public class Quantity<U extends IMeasurable> {
 
     private final double value;
@@ -25,7 +27,7 @@ public class Quantity<U extends IMeasurable> {
         if (this.unit.getClass() != other.unit.getClass())
             return false;
 
-        double base1 = this.unit.convertToBaseUnit(this.value);
+        double base1 = unit.convertToBaseUnit(value);
         double base2 = other.unit.convertToBaseUnit(other.value);
 
         return Math.abs(base1 - base2) < 0.0001;
@@ -42,18 +44,10 @@ public class Quantity<U extends IMeasurable> {
     }
 
     public Quantity<U> add(Quantity<U> other, U targetUnit) {
-
-        if (other == null) throw new IllegalArgumentException("Null value");
-        if (this.unit.getClass() != other.unit.getClass())
-            throw new IllegalArgumentException("Different categories");
-
-        double base1 = this.unit.convertToBaseUnit(this.value);
-        double base2 = other.unit.convertToBaseUnit(other.value);
-
-        double resultBase = base1 + base2;
-        double result = targetUnit.convertFromBaseUnit(resultBase);
-
-        return new Quantity<>(result, targetUnit);
+        validate(other, targetUnit, true);
+        double baseResult = perform(other, ArithmeticOperation.ADD);
+        double result = targetUnit.convertFromBaseUnit(baseResult);
+        return new Quantity<>(round(result), targetUnit);
     }
 
     public Quantity<U> subtract(Quantity<U> other) {
@@ -61,32 +55,62 @@ public class Quantity<U extends IMeasurable> {
     }
 
     public Quantity<U> subtract(Quantity<U> other, U targetUnit) {
-
-        if (other == null) throw new IllegalArgumentException("Null value");
-        if (this.unit.getClass() != other.unit.getClass())
-            throw new IllegalArgumentException("Different categories");
-
-        double base1 = this.unit.convertToBaseUnit(this.value);
-        double base2 = other.unit.convertToBaseUnit(other.value);
-
-        double resultBase = base1 - base2;
-        double result = targetUnit.convertFromBaseUnit(resultBase);
-
-        return new Quantity<>(result, targetUnit);
+        validate(other, targetUnit, true);
+        double baseResult = perform(other, ArithmeticOperation.SUBTRACT);
+        double result = targetUnit.convertFromBaseUnit(baseResult);
+        return new Quantity<>(round(result), targetUnit);
     }
 
     public double divide(Quantity<U> other) {
+        validate(other, null, false);
+        return perform(other, ArithmeticOperation.DIVIDE);
+    }
 
-        if (other == null) throw new IllegalArgumentException("Null value");
-        if (this.unit.getClass() != other.unit.getClass())
-            throw new IllegalArgumentException("Different categories");
+    private void validate(Quantity<U> other, U targetUnit, boolean needTarget) {
 
-        double base1 = this.unit.convertToBaseUnit(this.value);
+        if (other == null)
+            throw new IllegalArgumentException("Other quantity is null");
+
+        if (unit.getClass() != other.unit.getClass())
+            throw new IllegalArgumentException("Different measurement categories");
+
+        if (!Double.isFinite(value) || !Double.isFinite(other.value))
+            throw new IllegalArgumentException("Invalid numeric value");
+
+        if (needTarget && targetUnit == null)
+            throw new IllegalArgumentException("Target unit required");
+    }
+
+    private double perform(Quantity<U> other, ArithmeticOperation op) {
+
+        double base1 = unit.convertToBaseUnit(value);
         double base2 = other.unit.convertToBaseUnit(other.value);
 
-        if (base2 == 0) throw new ArithmeticException("Divide by zero");
+        if (op == ArithmeticOperation.DIVIDE && base2 == 0)
+            throw new ArithmeticException("Divide by zero");
 
-        return base1 / base2;
+        return op.compute(base1, base2);
+    }
+
+    private enum ArithmeticOperation {
+
+        ADD((a, b) -> a + b),
+        SUBTRACT((a, b) -> a - b),
+        DIVIDE((a, b) -> a / b);
+
+        private final DoubleBinaryOperator op;
+
+        ArithmeticOperation(DoubleBinaryOperator op) {
+            this.op = op;
+        }
+
+        public double compute(double a, double b) {
+            return op.applyAsDouble(a, b);
+        }
+    }
+
+    private double round(double val) {
+        return Math.round(val * 100.0) / 100.0;
     }
 
     @Override
